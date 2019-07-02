@@ -266,7 +266,7 @@ public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
         sslcontext,
         new String[]{"TLSv1"},
         null,
-        SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+        SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);  //By Lionoel@20190702
     } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
       this.log.error(e.getMessage(), e);
     }
