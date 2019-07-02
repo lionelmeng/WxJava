@@ -92,6 +92,9 @@ public class WxMaServiceImpl implements WxMaService, RequestHttp<CloseableHttpCl
     }
 
     this.httpClient = apacheHttpClientBuilder.build();
+
+    //忽略SSL证书校验 by Lionel@20190702
+    SSLUtil.enableSSL(this.httpClient);
   }
 
   @Override
