@@ -16,6 +16,7 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -266,7 +267,7 @@ public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
         sslcontext,
         new String[]{"TLSv1"},
         null,
-        SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);  //By Lionoel@20190702
+        NoopHostnameVerifier.INSTANCE);  //By Lionoel@20190702
     } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
       this.log.error(e.getMessage(), e);
     }
