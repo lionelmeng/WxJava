@@ -265,7 +265,7 @@ public class DefaultApacheHttpClientBuilder implements ApacheHttpClientBuilder {
 
       return new SSLConnectionSocketFactory(
         sslcontext,
-        new String[]{"TLSv1"},
+        new String[]{"TLSv1","TLSv1.1","TLSv1.2","TLSv2","TLSv3"}, //By Lionoel@20190708
         null,
         NoopHostnameVerifier.INSTANCE);  //By Lionoel@20190702
     } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
