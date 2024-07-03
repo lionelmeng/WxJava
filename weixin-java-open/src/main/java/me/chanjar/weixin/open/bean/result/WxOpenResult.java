@@ -1,17 +1,17 @@
 package me.chanjar.weixin.open.bean.result;
 
-import java.io.Serializable;
-
+import lombok.Data;
+import me.chanjar.weixin.common.util.json.WxGsonBuilder;
+import me.chanjar.weixin.open.util.json.WxOpenGsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Data;
-import me.chanjar.weixin.open.util.json.WxOpenGsonBuilder;
+import java.io.Serializable;
 
 /**
  * 基础的微信开放平台请求结果.
  *
  * @author yqx
- * @date 2018/10/1
+ * created on  2018/10/1
  */
 @Data
 public class WxOpenResult implements Serializable {
@@ -24,6 +24,10 @@ public class WxOpenResult implements Serializable {
    */
   public boolean isSuccess() {
     return StringUtils.equalsIgnoreCase(errcode, "0");
+  }
+
+  public static WxOpenResult fromJson(String json) {
+    return WxGsonBuilder.create().fromJson(json, WxOpenResult.class);
   }
 
   @Override

@@ -29,27 +29,38 @@ public class WxCpTagGetResult implements Serializable {
   private String errmsg;
 
   /**
-   * 用户列表
+   * 用户列表.
    */
   @SerializedName("userlist")
   private List<WxCpUser> userlist;
 
   /**
-   * 部门列表
+   * 部门列表.
    */
   @SerializedName("partylist")
   private List<Integer> partylist;
 
   /**
-   * 标签名称
+   * 标签名称.
    */
   @SerializedName("tagname")
   private String tagname;
 
+  /**
+   * From json wx cp tag get result.
+   *
+   * @param json the json
+   * @return the wx cp tag get result
+   */
   public static WxCpTagGetResult fromJson(String json) {
     return WxCpGsonBuilder.create().fromJson(json, WxCpTagGetResult.class);
   }
 
+  /**
+   * To json string.
+   *
+   * @return the string
+   */
   public String toJson() {
     return WxCpGsonBuilder.create().toJson(this);
   }

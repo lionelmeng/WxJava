@@ -1,19 +1,24 @@
 package me.chanjar.weixin.mp.api.impl;
 
-import jodd.http.*;
+import jodd.http.HttpConnectionProvider;
+import jodd.http.HttpRequest;
+import jodd.http.ProxyInfo;
 import jodd.http.net.SocketHttpConnectionProvider;
-import me.chanjar.weixin.common.WxType;
-import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.error.WxError;
-import me.chanjar.weixin.common.error.WxErrorException;
+import jodd.net.MimeTypes;
 import me.chanjar.weixin.common.util.http.HttpType;
-import me.chanjar.weixin.mp.api.WxMpConfigStorage;
-import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.WxMpStableAccessTokenRequest;
+import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 
-import java.util.concurrent.locks.Lock;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_ACCESS_TOKEN_URL;
+import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_STABLE_ACCESS_TOKEN_URL;
 
 /**
- * jodd-http方式实现
+ * jodd-http方式实现.
+ *
+ * @author someone
  */
 public class WxMpServiceJoddHttpImpl extends BaseWxMpServiceImpl<HttpConnectionProvider, ProxyInfo> {
   private HttpConnectionProvider httpClient;
@@ -43,42 +48,43 @@ public class WxMpServiceJoddHttpImpl extends BaseWxMpServiceImpl<HttpConnectionP
       httpProxy = new ProxyInfo(ProxyInfo.ProxyType.HTTP, configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort(), configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword());
     }
 
-    httpClient = JoddHttp.httpConnectionProvider;
+    httpClient = new SocketHttpConnectionProvider();
   }
 
   @Override
-  public String getAccessToken(boolean forceRefresh) throws WxErrorException {
-    if (!this.getWxMpConfigStorage().isAccessTokenExpired() && !forceRefresh) {
-      return this.getWxMpConfigStorage().getAccessToken();
+  protected String doGetAccessTokenRequest() throws IOException {
+    String url = String.format(GET_ACCESS_TOKEN_URL.getUrl(getWxMpConfigStorage()), getWxMpConfigStorage().getAppId(), getWxMpConfigStorage().getSecret());
+
+    HttpRequest request = HttpRequest.get(url);
+    if (this.getRequestHttpProxy() != null) {
+      SocketHttpConnectionProvider provider = new SocketHttpConnectionProvider();
+      provider.useProxy(getRequestHttpProxy());
+
+      request.withConnectionProvider(provider);
     }
+    return request.send().bodyText();
+  }
 
-    Lock lock = this.getWxMpConfigStorage().getAccessTokenLock();
-    lock.lock();
-    try {
-      String url = String.format(WxMpService.GET_ACCESS_TOKEN_URL,
-        this.getWxMpConfigStorage().getAppId(), this.getWxMpConfigStorage().getSecret());
+  @Override
+  protected String doGetStableAccessTokenRequest(boolean forceRefresh) throws IOException {
+    String url = GET_STABLE_ACCESS_TOKEN_URL.getUrl(getWxMpConfigStorage());
 
-      HttpRequest request = HttpRequest.get(url);
+    WxMpStableAccessTokenRequest wxMaAccessTokenRequest = new WxMpStableAccessTokenRequest();
+    wxMaAccessTokenRequest.setAppid(this.getWxMpConfigStorage().getAppId());
+    wxMaAccessTokenRequest.setSecret(this.getWxMpConfigStorage().getSecret());
+    wxMaAccessTokenRequest.setGrantType("client_credential");
+    wxMaAccessTokenRequest.setForceRefresh(forceRefresh);
 
-      if (this.getRequestHttpProxy() != null) {
-        SocketHttpConnectionProvider provider = new SocketHttpConnectionProvider();
-        provider.useProxy(getRequestHttpProxy());
+    HttpRequest request = HttpRequest.post(url)
+      .contentType(MimeTypes.MIME_APPLICATION_JSON, StandardCharsets.UTF_8.name())
+      .body(wxMaAccessTokenRequest.toJson());
+    if (this.getRequestHttpProxy() != null) {
+      SocketHttpConnectionProvider provider = new SocketHttpConnectionProvider();
+      provider.useProxy(getRequestHttpProxy());
 
-        request.withConnectionProvider(provider);
-      }
-      HttpResponse response = request.send();
-      String resultContent = response.bodyText();
-      WxError error = WxError.fromJson(resultContent, WxType.MP);
-      if (error.getErrorCode() != 0) {
-        throw new WxErrorException(error);
-      }
-      WxAccessToken accessToken = WxAccessToken.fromJson(resultContent);
-      this.getWxMpConfigStorage().updateAccessToken(accessToken.getAccessToken(), accessToken.getExpiresIn());
-
-      return this.getWxMpConfigStorage().getAccessToken();
-    } finally {
-      lock.unlock();
+      request.withConnectionProvider(provider);
     }
+    return request.send().bodyText();
   }
 
 }

@@ -1,6 +1,6 @@
 package me.chanjar.weixin.mp.util.requestexecuter.voice;
 
-import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestHttp;
@@ -31,9 +31,9 @@ public class VoiceUploadApacheHttpRequestExecutor extends VoiceUploadRequestExec
   }
 
   @Override
-  public Boolean execute(String uri, File data) throws WxErrorException, IOException {
+  public Boolean execute(String uri, File data, WxType wxType) throws WxErrorException, IOException {
     if (data == null) {
-      throw new WxErrorException(WxError.builder().errorCode(-1).errorMsg("文件对象为空").build());
+      throw new WxErrorException("文件对象为空");
     }
 
     HttpPost httpPost = new HttpPost(uri);
@@ -48,7 +48,6 @@ public class VoiceUploadApacheHttpRequestExecutor extends VoiceUploadRequestExec
       .setMode(HttpMultipartMode.RFC6532)
       .build();
     httpPost.setEntity(entity);
-    httpPost.setHeader("Content-Type", ContentType.MULTIPART_FORM_DATA.toString());
 
     try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpPost)) {
       String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);

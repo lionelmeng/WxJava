@@ -15,9 +15,6 @@ import me.chanjar.weixin.mp.enums.AiLangType;
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 public interface WxMpAiOpenService {
-  String TRANSLATE_URL = "http://api.weixin.qq.com/cgi-bin/media/voice/translatecontent?lfrom=%s&lto=%s";
-  String VOICE_UPLOAD_URL = "http://api.weixin.qq.com/cgi-bin/media/voice/addvoicetorecofortext?format=%s&voice_id=%s&lang=%s";
-  String VOICE_QUERY_RESULT_URL = "http://api.weixin.qq.com/cgi-bin/media/voice/queryrecoresultfortext";
 
   /**
    * <pre>
@@ -26,9 +23,10 @@ public interface WxMpAiOpenService {
    * http://api.weixin.qq.com/cgi-bin/media/voice/addvoicetorecofortext?access_token=ACCESS_TOKEN&format=&voice_id=xxxxxx&lang=zh_CN
    * </pre>
    *
+   * @param voiceId   语音唯一标识
    * @param lang      语言，zh_CN 或 en_US，默认中文
    * @param voiceFile 语音文件
-   * @param voiceId   语音唯一标识
+   * @throws WxErrorException the wx error exception
    */
   void uploadVoice(String voiceId, AiLangType lang, File voiceFile) throws WxErrorException;
 
@@ -42,8 +40,10 @@ public interface WxMpAiOpenService {
    *
    * </pre>
    *
-   * @param lang    语言，zh_CN 或 en_US，默认中文
    * @param voiceId 语音唯一标识
+   * @param lang    语言，zh_CN 或 en_US，默认中文
+   * @return the string
+   * @throws WxErrorException the wx error exception
    */
   String queryRecognitionResult(String voiceId, AiLangType lang) throws WxErrorException;
 
@@ -51,9 +51,11 @@ public interface WxMpAiOpenService {
    * 识别指定语音文件内容.
    * 此方法揉合了前两两个方法：uploadVoice 和 queryRecognitionResult
    *
+   * @param voiceId   语音唯一标识
    * @param lang      语言，zh_CN 或 en_US，默认中文
    * @param voiceFile 语音文件
-   * @param voiceId   语音唯一标识
+   * @return the string
+   * @throws WxErrorException the wx error exception
    */
   String recogniseVoice(String voiceId, AiLangType lang, File voiceFile) throws WxErrorException;
 
@@ -70,6 +72,8 @@ public interface WxMpAiOpenService {
    * @param langFrom 源语言，zh_CN 或 en_US
    * @param langTo   目标语言，zh_CN 或 en_US
    * @param content  要翻译的文本内容
+   * @return the string
+   * @throws WxErrorException the wx error exception
    */
   String translate(AiLangType langFrom, AiLangType langTo, String content) throws WxErrorException;
 }

@@ -1,14 +1,17 @@
 package com.github.binarywang.wxpay.bean.result;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import me.chanjar.weixin.common.util.json.GsonParser;
+import me.chanjar.weixin.common.util.json.WxGsonBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * <pre>
@@ -22,7 +25,8 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class WxPayRefundQueryResult extends BaseWxPayResult {
+public class WxPayRefundQueryResult extends BaseWxPayResult implements Serializable {
+  private static final long serialVersionUID = 5392369423225328754L;
   /**
    * <pre>
    * 字段名：设备号.
@@ -74,6 +78,45 @@ public class WxPayRefundQueryResult extends BaseWxPayResult {
    */
   @XStreamAlias("total_fee")
   private Integer totalFee;
+
+  /**
+   * <pre>
+   * 字段名：退款总金额.
+   * 变量名：refund_fee
+   * 是否必填：是
+   * 类型：Int
+   * 示例值：100
+   * 描述：各退款单的退款金额累加，单位为分，只能为整数，
+   * </pre>
+   */
+  @XStreamAlias("refund_fee")
+  private Integer refundFee;
+
+  /**
+   * <pre>
+   * 字段名：代金券退款总金额.
+   * 变量名：coupon_refund_fee
+   * 是否必填：是
+   * 类型：Int
+   * 示例值：100
+   * 描述：各退款单的代金券退款金额累加，单位为分，只能为整数，
+   * </pre>
+   */
+  @XStreamAlias("coupon_refund_fee")
+  private Integer couponRefundFee;
+
+  /**
+   * <pre>
+   * 字段名：用户退款金额.
+   * 变量名：cash_refund_fee
+   * 是否必填：是
+   * 类型：Int
+   * 示例值：100
+   * 描述：退款给用户的金额，不包含所有优惠券金额，单位为分，只能为整数，
+   * </pre>
+   */
+  @XStreamAlias("cash_refund_fee")
+  private Integer cashRefundFee;
 
   /**
    * <pre>
@@ -130,6 +173,34 @@ public class WxPayRefundQueryResult extends BaseWxPayResult {
   private List<RefundRecord> refundRecords;
 
   /**
+   * 营销详情.
+   */
+  @XStreamAlias("promotion_detail")
+  private String promotionDetailString;
+
+  private List<WxPayRefundPromotionDetail> promotionDetails;
+
+  /**
+   * 组装生成营销详情信息.
+   */
+  public void composePromotionDetails() {
+    if (StringUtils.isEmpty(this.promotionDetailString)) {
+      return;
+    }
+
+    JsonObject tmpJson = GsonParser.parse(this.promotionDetailString);
+
+    final List<WxPayRefundPromotionDetail> promotionDetail = WxGsonBuilder.create()
+      .fromJson(tmpJson.get("promotion_detail"),
+        new TypeToken<List<WxPayRefundPromotionDetail>>() {
+        }.getType()
+      );
+
+    this.setPromotionDetails(promotionDetail);
+  }
+
+
+  /**
    * 组装生成退款记录属性的内容.
    */
   public void composeRefundRecords() {
@@ -173,13 +244,31 @@ public class WxPayRefundQueryResult extends BaseWxPayResult {
   }
 
   /**
+   * 从XML结构中加载额外的熟悉
+   *
+   * @param d Document
+   */
+  @Override
+  protected void loadXml(Document d) {
+    deviceInfo = readXmlString(d, "device_info");
+    transactionId = readXmlString(d, "transaction_id");
+    outTradeNo = readXmlString(d, "out_trade_no");
+    totalFee = readXmlInteger(d, "total_fee");
+    settlementTotalFee = readXmlInteger(d, "settlement_total_fee");
+    feeType = readXmlString(d, "fee_type");
+    cashFee = readXmlInteger(d, "cash_fee");
+    refundCount = readXmlInteger(d, "refund_count");
+  }
+
+  /**
    * The type Refund record.
    */
   @Data
   @Builder(builderMethodName = "newBuilder")
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class RefundRecord {
+  public static class RefundRecord  implements Serializable {
+    private static final long serialVersionUID=1L;
     /**
      * <pre>
      * 字段名：商户退款单号.

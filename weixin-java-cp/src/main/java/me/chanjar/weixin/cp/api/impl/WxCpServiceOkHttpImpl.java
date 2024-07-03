@@ -1,20 +1,29 @@
 package me.chanjar.weixin.cp.api.impl;
 
-import me.chanjar.weixin.common.WxType;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxAccessToken;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.HttpType;
+import me.chanjar.weixin.common.util.http.okhttp.DefaultOkHttpClientBuilder;
 import me.chanjar.weixin.common.util.http.okhttp.OkHttpProxyInfo;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import okhttp3.*;
 
 import java.io.IOException;
 
-public class WxCpServiceOkHttpImpl extends BaseWxCpServiceImpl<OkHttpClient, OkHttpProxyInfo> {
-  protected OkHttpClient httpClient;
-  protected OkHttpProxyInfo httpProxy;
+import static me.chanjar.weixin.cp.constant.WxCpApiPathConsts.GET_TOKEN;
 
+/**
+ * The type Wx cp service ok http.
+ *
+ * @author someone
+ */
+@Slf4j
+public class WxCpServiceOkHttpImpl extends BaseWxCpServiceImpl<OkHttpClient, OkHttpProxyInfo> {
+  private OkHttpClient httpClient;
+  private OkHttpProxyInfo httpProxy;
 
   @Override
   public OkHttpClient getRequestHttpClient() {
@@ -38,47 +47,44 @@ public class WxCpServiceOkHttpImpl extends BaseWxCpServiceImpl<OkHttpClient, OkH
     }
 
     synchronized (this.globalAccessTokenRefreshLock) {
-        String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?"
-          + "&corpid=" + this.configStorage.getCorpId()
-          + "&corpsecret=" + this.configStorage.getCorpSecret();
-        //得到httpClient
-        OkHttpClient client = getRequestHttpClient();
-        //请求的request
-        Request request = new Request.Builder().url(url).get().build();
-        String resultContent = null;
-        try {
-          Response response = client.newCall(request).execute();
-          resultContent = response.body().string();
-        } catch (IOException e) {
-          this.log.error(e.getMessage(), e);
-        }
+      //得到httpClient
+      OkHttpClient client = getRequestHttpClient();
+      //请求的request
+      Request request = new Request.Builder()
+        .url(String.format(this.configStorage.getApiUrl(GET_TOKEN), this.configStorage.getCorpId(),
+          this.configStorage.getCorpSecret()))
+        .get()
+        .build();
+      String resultContent = null;
+      try {
+        Response response = client.newCall(request).execute();
+        resultContent = response.body().string();
+      } catch (IOException e) {
+        log.error(e.getMessage(), e);
+      }
 
-        WxError error = WxError.fromJson(resultContent, WxType.CP);
-        if (error.getErrorCode() != 0) {
-          throw new WxErrorException(error);
-        }
-        WxAccessToken accessToken = WxAccessToken.fromJson(resultContent);
-        this.configStorage.updateAccessToken(accessToken.getAccessToken(),
-          accessToken.getExpiresIn());
+      WxError error = WxError.fromJson(resultContent, WxType.CP);
+      if (error.getErrorCode() != 0) {
+        throw new WxErrorException(error);
+      }
+      WxAccessToken accessToken = WxAccessToken.fromJson(resultContent);
+      this.configStorage.updateAccessToken(accessToken.getAccessToken(),
+        accessToken.getExpiresIn());
     }
     return this.configStorage.getAccessToken();
   }
 
   @Override
   public void initHttp() {
-    this.log.debug("WxCpServiceOkHttpImpl initHttp");
+    log.debug("WxCpServiceOkHttpImpl initHttp");
     //设置代理
     if (configStorage.getHttpProxyHost() != null && configStorage.getHttpProxyPort() > 0) {
       httpProxy = OkHttpProxyInfo.httpProxy(configStorage.getHttpProxyHost(),
         configStorage.getHttpProxyPort(),
         configStorage.getHttpProxyUsername(),
         configStorage.getHttpProxyPassword());
-    }
-
-    OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-    if (httpProxy != null) {
+      OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
       clientBuilder.proxy(getRequestHttpProxy().getProxy());
-
       //设置授权
       clientBuilder.authenticator(new Authenticator() {
         @Override
@@ -89,8 +95,10 @@ public class WxCpServiceOkHttpImpl extends BaseWxCpServiceImpl<OkHttpClient, OkH
             .build();
         }
       });
+      httpClient = clientBuilder.build();
+    } else {
+      httpClient = DefaultOkHttpClientBuilder.get().build();
     }
-    httpClient = clientBuilder.build();
   }
 
   @Override

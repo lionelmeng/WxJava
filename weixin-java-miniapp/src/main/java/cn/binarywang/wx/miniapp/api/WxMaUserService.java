@@ -18,6 +18,8 @@ public interface WxMaUserService {
    * 获取登录后的session信息.
    *
    * @param jsCode 登录时获取的 code
+   * @return .
+   * @throws WxErrorException .
    */
   WxMaJscode2SessionResult getSessionInfo(String jsCode) throws WxErrorException;
 
@@ -34,20 +36,35 @@ public interface WxMaUserService {
    * 上报用户数据后台接口.
    * <p>小游戏可以通过本接口上报key-value数据到用户的CloudStorage。</p>
    * 文档参考https://developers.weixin.qq.com/minigame/dev/document/open-api/data/setUserStorage.html
-   *  @param kvMap      要上报的数据
+   *
+   * @param kvMap      要上报的数据
    * @param sessionKey 通过wx.login 获得的登录态
-   * @param openid
+   * @param openid     .
+   * @throws WxErrorException .
    */
   void setUserStorage(Map<String, String> kvMap, String sessionKey, String openid) throws WxErrorException;
 
   /**
-   * 解密用户手机号信息.
+   * 获取手机号信息,2023年8月28日起
    *
-   * @param sessionKey    会话密钥
-   * @param encryptedData 消息密文
-   * @param ivStr         加密算法的初始向量
+   * @param code 每个code只能使用一次，code的有效期为5min。code获取方式参考<a href="https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/getPhoneNumber.html">手机号快速验证组件</a>
+   * @return 用户手机号信息
+   * @throws WxErrorException .
+   * @apiNote 该接口用于将code换取用户手机号。
    */
-  WxMaPhoneNumberInfo getPhoneNoInfo(String sessionKey, String encryptedData, String ivStr);
+  WxMaPhoneNumberInfo getPhoneNumber(String code) throws WxErrorException;
+
+  /**
+   * 获取手机号信息,2023年8月28日起
+   *
+   * @param code 每个code只能使用一次，code的有效期为5min。code获取方式参考<a href="https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/getPhoneNumber.html">手机号快速验证组件</a>
+   * @return 用户手机号信息
+   * @throws WxErrorException .
+   * @apiNote 该接口用于将code换取用户手机号。
+   * @implNote 为保持命名风格一致，此方法将更名，推荐使用{@link WxMaUserService#getPhoneNumber(String)}
+   */
+  @Deprecated
+  WxMaPhoneNumberInfo getPhoneNoInfo(String code) throws WxErrorException;
 
   /**
    * 验证用户信息完整性.
@@ -55,6 +72,7 @@ public interface WxMaUserService {
    * @param sessionKey 会话密钥
    * @param rawData    微信用户基本信息
    * @param signature  数据签名
+   * @return .
    */
   boolean checkUserInfo(String sessionKey, String rawData, String signature);
 }

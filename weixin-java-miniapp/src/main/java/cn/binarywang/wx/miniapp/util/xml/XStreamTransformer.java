@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.binarywang.wx.miniapp.bean.WxMaMessage;
+import cn.binarywang.wx.miniapp.message.WxMaXmlOutMessage;
 import com.thoughtworks.xstream.XStream;
 import me.chanjar.weixin.common.util.xml.XStreamInitializer;
 
@@ -19,6 +20,7 @@ public class XStreamTransformer {
 
   static {
     registerClass(WxMaMessage.class);
+    registerClass(WxMaXmlOutMessage.class);
   }
 
   /**
@@ -52,7 +54,22 @@ public class XStreamTransformer {
   public static void register(Class<?> clz, XStream xStream) {
     CLASS_2_XSTREAM_INSTANCE.put(clz, xStream);
   }
+  /**
+   * 注册第三方的该类及其子类.
+   * 便利第三方类使用 XStreamTransformer进行序列化, 以及支持XStream 1.4.18 以上增加安全许可
+   * @param clz 要注册的类
+   */
+  public static void registerExtendClass(Class<?> clz){
+    XStream xstream = XStreamInitializer.getInstance();
 
+    Class<?>[] innerClz = getInnerClasses(clz);
+    xstream.processAnnotations(clz);
+    xstream.processAnnotations(innerClz);
+    xstream.allowTypes(new Class[]{clz});
+    xstream.allowTypes(innerClz);
+
+    register(clz, xstream);
+  }
   /**
    * 会自动注册该类及其子类.
    *

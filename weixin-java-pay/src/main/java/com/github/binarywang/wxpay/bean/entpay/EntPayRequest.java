@@ -8,7 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import me.chanjar.weixin.common.annotation.Required;
-import me.chanjar.weixin.common.util.json.WxGsonBuilder;
+
+import java.util.Map;
 
 /**
  * <pre>
@@ -25,6 +26,8 @@ import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 @AllArgsConstructor
 @XStreamAlias("xml")
 public class EntPayRequest extends BaseWxPayRequest {
+  private static final long serialVersionUID = 8647710192770447579L;
+
   /**
    * <pre>
    * 字段名：公众账号appid.
@@ -164,6 +167,45 @@ public class EntPayRequest extends BaseWxPayRequest {
   @XStreamAlias("spbill_create_ip")
   private String spbillCreateIp;
 
+  /**
+   * <pre>
+   * 字段名：付款场景.
+   * 变量名：scene
+   * 是否必填：否
+   * 示例值：BRAND_REDPACKET
+   * 类型：String(64)
+   * 描述：BRAND_REDPACKET：品牌红包，其他值或不传则默认为普通付款到零钱
+   * </pre>
+   */
+  @XStreamAlias("scene")
+  private String scene;
+
+  /**
+   * <pre>
+   * 字段名：品牌ID.
+   * 变量名：brand_id
+   * 是否必填：否
+   * 示例值：1234
+   * 类型：int
+   * 描述：品牌在微信支付的唯一标识。仅在付款场景为品牌红包时必填
+   * </pre>
+   */
+  @XStreamAlias("brand_id")
+  private Integer brandId;
+
+  /**
+   * <pre>
+   * 字段名：消息模板ID.
+   * 变量名：finder_template_id
+   * 是否必填：否
+   * 示例值：1243100000000000
+   * 类型：String(128)
+   * 描述：品牌所配置的消息模板的唯一标识。仅在付款场景为品牌红包时必填。
+   * </pre>
+   */
+  @XStreamAlias("finder_template_id")
+  private String finderTemplateId;
+
   @Override
   protected void checkConstraints() {
 
@@ -190,12 +232,24 @@ public class EntPayRequest extends BaseWxPayRequest {
   }
 
   @Override
-  public String toString() {
-    return WxGsonBuilder.create().toJson(this);
+  protected String[] getIgnoredParamsForSign() {
+    return new String[]{"sign_type"};
   }
 
   @Override
-  protected String[] getIgnoredParamsForSign() {
-    return new String[]{"sign_type"};
+  protected void storeMap(Map<String, String> map) {
+    map.put("mch_appid", mchAppid);
+    map.put("mchid", mchId);
+    map.put("device_info", deviceInfo);
+    map.put("partner_trade_no", partnerTradeNo);
+    map.put("openid", openid);
+    map.put("check_name", checkName);
+    map.put("re_user_name", reUserName);
+    map.put("amount", amount.toString());
+    map.put("desc", description);
+    map.put("spbill_create_ip", spbillCreateIp);
+    map.put("scene", scene);
+    map.put("brand_id", brandId.toString());
+    map.put("finder_template_id", finderTemplateId);
   }
 }

@@ -7,12 +7,11 @@ import me.chanjar.weixin.mp.bean.WxMpShakeQuery;
 import me.chanjar.weixin.mp.bean.shake.*;
 
 /**
- * 摇一摇周边的相关接口
+ * 摇一摇周边的相关接口.
  *
  * @author rememberber
  */
 public interface WxMpShakeService {
-
   /**
    * <pre>
    * 获取设备及用户信息<br/>
@@ -23,6 +22,8 @@ public interface WxMpShakeService {
    * </pre>
    *
    * @param wxMpShakeQuery 查询参数
+   * @return the shake info
+   * @throws WxErrorException the wx error exception
    */
   WxMpShakeInfoResult getShakeInfo(WxMpShakeQuery wxMpShakeQuery) throws WxErrorException;
 
@@ -31,9 +32,10 @@ public interface WxMpShakeService {
    * 页面管理<br/>
    * 详情请见: https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1459246752
    * </pre>
-   * @param shakeAroundPageAddQuery
-   * @return
-   * @throws WxErrorException
+   *
+   * @param shakeAroundPageAddQuery the shake around page add query
+   * @return . wx mp shake around page add result
+   * @throws WxErrorException the wx error exception
    */
   WxMpShakeAroundPageAddResult pageAdd(WxMpShakeAroundPageAddQuery shakeAroundPageAddQuery) throws WxErrorException;
 
@@ -42,9 +44,10 @@ public interface WxMpShakeService {
    * 配置设备与页面的关联关系<br/>
    * 详情请见: https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1459301931
    * </pre>
-   * @param shakeAroundDeviceBindPageQuery
-   * @return
-   * @throws WxErrorException
+   *
+   * @param shakeAroundDeviceBindPageQuery the shake around device bind page query
+   * @return . wx error
+   * @throws WxErrorException the wx error exception
    */
   WxError deviceBindPageQuery(WxMpShakeAroundDeviceBindPageQuery shakeAroundDeviceBindPageQuery) throws WxErrorException;
 
@@ -53,9 +56,10 @@ public interface WxMpShakeService {
    * 查询设备与页面的关联关系<br/>
    * 详情请见: https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1443447914
    * </pre>
-   * @param shakeAroundRelationSearchQuery
-   * @return
-   * @throws WxErrorException
+   *
+   * @param shakeAroundRelationSearchQuery the shake around relation search query
+   * @return . wx mp shake around relation search result
+   * @throws WxErrorException the wx error exception
    */
   WxMpShakeAroundRelationSearchResult relationSearch(WxMpShakeAroundRelationSearchQuery shakeAroundRelationSearchQuery) throws WxErrorException;
 }

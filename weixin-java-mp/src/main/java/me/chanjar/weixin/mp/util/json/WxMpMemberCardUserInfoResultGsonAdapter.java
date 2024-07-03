@@ -8,10 +8,11 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.util.json.GsonHelper;
-import me.chanjar.weixin.mp.bean.membercard.MemberCardUserInfo;
-import me.chanjar.weixin.mp.bean.membercard.NameValues;
-import me.chanjar.weixin.mp.bean.membercard.WxMpMemberCardUserInfoResult;
+import me.chanjar.weixin.mp.bean.card.membercard.MemberCardUserInfo;
+import me.chanjar.weixin.mp.bean.card.membercard.NameValues;
+import me.chanjar.weixin.mp.bean.card.membercard.WxMpMemberCardUserInfoResult;
 
 import static me.chanjar.weixin.common.util.json.GsonHelper.getString;
 
@@ -31,7 +32,7 @@ public class WxMpMemberCardUserInfoResultGsonAdapter implements JsonDeserializer
     JsonObject jsonObject = jsonElement.getAsJsonObject();
 
     result.setOpenId(getString(jsonObject, "openid"));
-    result.setErrorCode(getString(jsonObject, "errcode"));
+    result.setErrorCode(getString(jsonObject, WxConsts.ERR_CODE));
     result.setErrorMsg(getString(jsonObject, "errmsg"));
     result.setNickname(getString(jsonObject, "nickname"));
     result.setMembershipNumber(getString(jsonObject, "membership_number"));

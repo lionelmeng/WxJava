@@ -53,6 +53,11 @@ public class WxMpTemplateMessage implements Serializable {
   private MiniProgram miniProgram;
 
   /**
+   * 防重入id.
+   */
+  private String clientMsgId;
+
+  /**
    * 模板数据.
    */
   @Builder.Default
@@ -83,7 +88,7 @@ public class WxMpTemplateMessage implements Serializable {
      * 是否使用path，否则使用pagepath.
      * 加入此字段是基于微信官方接口变化多端的考虑
      */
-    private boolean usePath = true;
+    private boolean usePath = false;
   }
 
 }

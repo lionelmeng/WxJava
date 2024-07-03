@@ -1,9 +1,11 @@
 package cn.binarywang.wx.miniapp.bean.code;
 
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -15,6 +17,8 @@ import java.io.Serializable;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class WxMaCodeAuditStatus implements Serializable {
   private static final long serialVersionUID = 4655119308692217268L;
   /**
@@ -36,6 +40,24 @@ public class WxMaCodeAuditStatus implements Serializable {
    */
   @SerializedName(value = "screenshot")
   private String screenShot;
+
+  /**
+   * 审核版本
+   */
+  @SerializedName(value = "user_version")
+  private String userVersion;
+
+  /**
+   * 版本描述
+   */
+  @SerializedName(value = "user_desc")
+  private String userDesc;
+
+  /**
+   * 时间戳，提交审核的时间
+   */
+  @SerializedName(value = "submit_audit_time")
+  private String submitAuditTime;
 
   public static WxMaCodeAuditStatus fromJson(String json) {
     return WxMaGsonBuilder.create().fromJson(json, WxMaCodeAuditStatus.class);

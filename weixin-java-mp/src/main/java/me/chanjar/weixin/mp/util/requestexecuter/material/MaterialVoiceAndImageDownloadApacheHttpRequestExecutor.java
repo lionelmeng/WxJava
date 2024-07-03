@@ -1,5 +1,6 @@
 package me.chanjar.weixin.mp.util.requestexecuter.material;
 
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestHttp;
@@ -30,7 +31,7 @@ public class MaterialVoiceAndImageDownloadApacheHttpRequestExecutor extends Mate
   }
 
   @Override
-  public InputStream execute(String uri, String materialId) throws WxErrorException, IOException {
+  public InputStream execute(String uri, String materialId, WxType wxType) throws WxErrorException, IOException {
     HttpPost httpPost = new HttpPost(uri);
     if (requestHttp.getRequestHttpProxy() != null) {
       RequestConfig config = RequestConfig.custom().setProxy(requestHttp.getRequestHttpProxy()).build();
@@ -45,7 +46,7 @@ public class MaterialVoiceAndImageDownloadApacheHttpRequestExecutor extends Mate
       // 下载媒体文件出错
       byte[] responseContent = IOUtils.toByteArray(inputStream);
       String responseContentString = new String(responseContent, StandardCharsets.UTF_8);
-      if (responseContentString.length() < 100) {
+      if (responseContentString.length() <= 215) {
         try {
           WxError wxError = WxGsonBuilder.create().fromJson(responseContentString, WxError.class);
           if (wxError.getErrorCode() != 0) {

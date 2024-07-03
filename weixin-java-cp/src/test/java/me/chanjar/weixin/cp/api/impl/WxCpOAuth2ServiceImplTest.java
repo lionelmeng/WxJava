@@ -4,9 +4,12 @@ import com.google.inject.Inject;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.ApiTestModule;
 import me.chanjar.weixin.cp.api.WxCpService;
+import me.chanjar.weixin.cp.bean.WxCpOauth2UserInfo;
 import me.chanjar.weixin.cp.bean.WxCpUserDetail;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * <pre>
@@ -20,14 +23,34 @@ public class WxCpOAuth2ServiceImplTest {
   @Inject
   private WxCpService wxService;
 
+  /**
+   * Test get user detail.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetUserDetail() throws WxErrorException {
     WxCpUserDetail userDetail = this.wxService.getOauth2Service().getUserDetail("b");
     System.out.println(userDetail);
   }
 
+  /**
+   * Test get user info.
+   *
+   * @throws WxErrorException the wx error exception
+   */
   @Test
   public void testGetUserInfo() throws WxErrorException {
-    this.wxService.getOauth2Service().getUserInfo("abc");
+    final WxCpOauth2UserInfo result = this.wxService.getOauth2Service().getUserInfo("abc");
+    assertThat(result).isNotNull();
+    System.out.println(result);
   }
+
+  /**
+   * Test build authorization url.
+   */
+  @Test
+  public void testBuildAuthorizationUrl() {
+  }
+
 }

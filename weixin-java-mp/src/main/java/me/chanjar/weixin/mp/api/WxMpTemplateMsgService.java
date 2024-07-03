@@ -13,11 +13,9 @@ import java.util.List;
  * http://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277&token=&lang=zh_CN
  * Created by Binary Wang on 2016-10-14.
  * @author miller.lin
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- * </pre>
+ * @author  <a href="https://github.com/binarywang">Binary Wang</a> </pre>
  */
 public interface WxMpTemplateMsgService {
-
   /**
    * <pre>
    * 设置所属行业
@@ -25,7 +23,9 @@ public interface WxMpTemplateMsgService {
    * 详情请见：http://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277&token=&lang=zh_CN
    * </pre>
    *
-   * @return 是否成功
+   * @param wxMpIndustry 行业信息
+   * @return 是否成功 industry
+   * @throws WxErrorException .
    */
   boolean setIndustry(WxMpTemplateIndustry wxMpIndustry) throws WxErrorException;
 
@@ -35,7 +35,8 @@ public interface WxMpTemplateMsgService {
    * 详情请见：http://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277&token=&lang=zh_CN
    * </pre>
    *
-   * @return wxMpIndustry
+   * @return wxMpIndustry industry
+   * @throws WxErrorException .
    */
   WxMpTemplateIndustry getIndustry() throws WxErrorException;
 
@@ -45,7 +46,9 @@ public interface WxMpTemplateMsgService {
    * 详情请见: http://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277&token=&lang=zh_CN
    * </pre>
    *
-   * @return 消息Id
+   * @param templateMessage 模板消息
+   * @return 消息Id string
+   * @throws WxErrorException .
    */
   String sendTemplateMsg(WxMpTemplateMessage templateMessage) throws WxErrorException;
 
@@ -59,8 +62,26 @@ public interface WxMpTemplateMsgService {
    *
    * @param shortTemplateId 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式
    * @return templateId 模板Id
+   * @throws WxErrorException .
+   * @deprecated 请使用 addTemplate(java.lang.String, java.util.List)
    */
+  @Deprecated
   String addTemplate(String shortTemplateId) throws WxErrorException;
+
+  /**
+   * <pre>
+   * 获得模板ID
+   * 从类目模板库选择模板到帐号后台，获得模板ID的过程可在MP中完成
+   * 详情请见: http://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277&token=&lang=zh_CN
+   * 接口地址格式：https://api.weixin.qq.com/cgi-bin/template/api_add_template?access_token=ACCESS_TOKEN
+   * </pre>
+   *
+   * @param shortTemplateId 模板库中模板的编号，有“TM**”和“OPENTMTM**”等形式,对于类目模板，为纯数字ID
+   * @param keywordNameList 选用的类目模板的关键词,按顺序传入,如果为空，或者关键词不在模板库中，会返回40246错误码
+   * @return templateId 模板Id
+   * @throws WxErrorException .
+   */
+  String addTemplate(String shortTemplateId, List<String> keywordNameList) throws WxErrorException;
 
   /**
    * <pre>
@@ -71,6 +92,7 @@ public interface WxMpTemplateMsgService {
    * </pre>
    *
    * @return templateId 模板Id
+   * @throws WxErrorException .
    */
   List<WxMpTemplate> getAllPrivateTemplate() throws WxErrorException;
 
@@ -83,6 +105,8 @@ public interface WxMpTemplateMsgService {
    * </pre>
    *
    * @param templateId 模板Id
+   * @return . boolean
+   * @throws WxErrorException .
    */
   boolean delPrivateTemplate(String templateId) throws WxErrorException;
 }

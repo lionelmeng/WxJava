@@ -1,20 +1,28 @@
 package com.github.binarywang.wxpay.bean.request;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.util.SignUtils;
+import com.github.binarywang.wxpay.util.XmlConfig;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.BeanUtils;
 import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 import me.chanjar.weixin.common.util.xml.XStreamInitializer;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.github.binarywang.wxpay.constant.WxPayConstants.SignType.ALL_SIGN_TYPES;
 
@@ -27,6 +35,7 @@ import static com.github.binarywang.wxpay.constant.WxPayConstants.SignType.ALL_S
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @Data
+@Accessors(chain = true)
 public abstract class BaseWxPayRequest implements Serializable {
   private static final long serialVersionUID = -4766915659779847060L;
 
@@ -116,6 +125,21 @@ public abstract class BaseWxPayRequest implements Serializable {
   @XStreamAlias("sign_type")
   private String signType;
 
+
+  /**
+   * 企业微信签名
+   */
+  @XStreamAlias("workwx_sign")
+  private String workWxSign;
+
+  public String getWorkWxSign() {
+    return workWxSign;
+  }
+
+  public void setWorkWxSign(String workWxSign) {
+    this.workWxSign = workWxSign;
+  }
+
   /**
    * 将单位为元转换为单位为分.
    *
@@ -124,6 +148,20 @@ public abstract class BaseWxPayRequest implements Serializable {
    */
   public static Integer yuanToFen(String yuan) {
     return new BigDecimal(yuan).setScale(2, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal(100)).intValue();
+  }
+
+  /**
+   * 元转分
+   */
+  public static Integer yuan2Fen(BigDecimal yuan) {
+    return yuan.multiply(BigDecimal.valueOf(100)).setScale(2, BigDecimal.ROUND_HALF_UP).intValue();
+  }
+
+  /**
+   * 分转元
+   */
+  public static BigDecimal fen2Yuan(BigDecimal fen) {
+    return fen.divide(BigDecimal.valueOf(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
   }
 
   /**
@@ -147,6 +185,13 @@ public abstract class BaseWxPayRequest implements Serializable {
    * @throws WxPayException the wx pay exception
    */
   protected abstract void checkConstraints() throws WxPayException;
+
+  /**
+   * 是否需要nonce_str
+   */
+  protected boolean needNonceStr() {
+    return true;
+  }
 
   /**
    * 如果配置中已经设置，可以不设置值.
@@ -186,12 +231,48 @@ public abstract class BaseWxPayRequest implements Serializable {
    * @return the string
    */
   public String toXML() {
-    XStream xstream = XStreamInitializer.getInstance();
     //涉及到服务商模式的两个参数，在为空值时置为null，以免在请求时将空值传给微信服务器
     this.setSubAppId(StringUtils.trimToNull(this.getSubAppId()));
     this.setSubMchId(StringUtils.trimToNull(this.getSubMchId()));
+    if (XmlConfig.fastMode) {
+      return toFastXml();
+    }
+    XStream xstream = XStreamInitializer.getInstance();
     xstream.processAnnotations(this.getClass());
     return xstream.toXML(this);
+  }
+
+  /**
+   * 使用快速算法组装xml
+   */
+  private String toFastXml() {
+    try {
+      Document document = DocumentHelper.createDocument();
+      Element root = document.addElement(xmlRootTagName());
+
+      Map<String, String> signParams = getSignParams();
+      signParams.put("sign", sign);
+      for (Map.Entry<String, String> entry : signParams.entrySet()) {
+        if (entry.getValue() == null) {
+          continue;
+        }
+        Element elm = root.addElement(entry.getKey());
+        elm.addText(entry.getValue());
+      }
+
+      return document.asXML();
+    } catch (Exception e) {
+      throw new WxRuntimeException("generate xml error", e);
+    }
+  }
+
+  /**
+   * 返回xml结构的根节点名称
+   *
+   * @return 默认返回"xml", 特殊情况可以在子类中覆盖
+   */
+  protected String xmlRootTagName() {
+    return "xml";
   }
 
   /**
@@ -204,6 +285,26 @@ public abstract class BaseWxPayRequest implements Serializable {
   }
 
   /**
+   * 签名时，是否忽略sub_appid.
+   *
+   * @return the boolean
+   */
+  protected boolean ignoreSubAppId() {
+    return false;
+  }
+
+  protected boolean ignoreSubMchId() {
+    return false;
+  }
+
+  /**
+   * 是否是企业微信字段
+   */
+  protected boolean isWxWorkSign() {
+    return false;
+  }
+
+  /**
    * 签名时，忽略的参数.
    *
    * @return the string [ ]
@@ -211,6 +312,32 @@ public abstract class BaseWxPayRequest implements Serializable {
   protected String[] getIgnoredParamsForSign() {
     return new String[0];
   }
+
+  /**
+   * 获取签名时需要的参数.
+   * 注意：不含sign属性
+   */
+  public Map<String, String> getSignParams() {
+    Map<String, String> map = new HashMap<>(8);
+    map.put("appid", appid);
+    map.put("mch_id", mchId);
+    map.put("sub_appid", subAppId);
+    map.put("sub_mch_id", subMchId);
+    map.put("nonce_str", nonceStr);
+    map.put("sign_type", signType);
+
+    storeMap(map);
+    return map;
+  }
+
+  /**
+   * 将属性组装到一个Map中，供签名和最终发送XML时使用.
+   * 这里需要将所有的属性全部保存进来，签名的时候会自动调用getIgnoredParamsForSign进行忽略，
+   * 不用担心。否则最终生成的XML会缺失。
+   *
+   * @param map 传入的属性Map
+   */
+  protected abstract void storeMap(Map<String, String> map);
 
   /**
    * <pre>
@@ -236,12 +363,16 @@ public abstract class BaseWxPayRequest implements Serializable {
       this.setMchId(config.getMchId());
     }
 
-    if (StringUtils.isBlank(getSubAppId())) {
-      this.setSubAppId(config.getSubAppId());
+    if (!ignoreSubAppId()) {
+      if (StringUtils.isBlank(getSubAppId())) {
+        this.setSubAppId(config.getSubAppId());
+      }
     }
 
-    if (StringUtils.isBlank(getSubMchId())) {
-      this.setSubMchId(config.getSubMchId());
+    if (!ignoreSubMchId()) {
+      if (StringUtils.isBlank(getSubMchId())) {
+        this.setSubMchId(config.getSubMchId());
+      }
     }
 
     if (StringUtils.isBlank(getSignType())) {
@@ -255,7 +386,7 @@ public abstract class BaseWxPayRequest implements Serializable {
       }
     }
 
-    if (StringUtils.isBlank(getNonceStr())) {
+    if (needNonceStr() && StringUtils.isBlank(getNonceStr())) {
       this.setNonceStr(String.valueOf(System.currentTimeMillis()));
     }
 

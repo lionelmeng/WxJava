@@ -1,7 +1,8 @@
 package me.chanjar.weixin.mp.bean.kefu;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import me.chanjar.weixin.common.api.WxConsts;
+import lombok.NoArgsConstructor;
 import me.chanjar.weixin.mp.builder.kefu.*;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 客服消息
+ * 客服消息.
  *
  * @author chanjarster
  */
@@ -32,86 +33,109 @@ public class WxMpKefuMessage implements Serializable {
   private String mpNewsMediaId;
   private String miniProgramAppId;
   private String miniProgramPagePath;
+  private String headContent;
+  private String tailContent;
   private List<WxArticle> articles = new ArrayList<>();
+  private String mpNewsArticleId;
 
   /**
-   * 获得文本消息builder
+   * 菜单消息里的菜单内容.
+   */
+  private List<MsgMenu> msgMenus = new ArrayList<>();
+
+  /**
+   * 获得文本消息builder.
    */
   public static TextBuilder TEXT() {
     return new TextBuilder();
   }
 
   /**
-   * 获得图片消息builder
+   * 获得图片消息builder.
    */
   public static ImageBuilder IMAGE() {
     return new ImageBuilder();
   }
 
   /**
-   * 获得语音消息builder
+   * 获得语音消息builder.
    */
   public static VoiceBuilder VOICE() {
     return new VoiceBuilder();
   }
 
   /**
-   * 获得视频消息builder
+   * 获得视频消息builder.
    */
   public static VideoBuilder VIDEO() {
     return new VideoBuilder();
   }
 
   /**
-   * 获得音乐消息builder
+   * 获得音乐消息builder.
    */
   public static MusicBuilder MUSIC() {
     return new MusicBuilder();
   }
 
   /**
-   * 获得图文消息（点击跳转到外链）builder
+   * 获得图文消息（点击跳转到外链）builder.
    */
   public static NewsBuilder NEWS() {
     return new NewsBuilder();
   }
 
   /**
-   * 获得图文消息（点击跳转到图文消息页面）builder
+   * 获得图文消息（点击跳转到图文消息页面）builder.
    */
   public static MpNewsBuilder MPNEWS() {
     return new MpNewsBuilder();
   }
 
   /**
-   * 获得卡券消息builder
+   * 获得卡券消息builder.
    */
   public static WxCardBuilder WXCARD() {
     return new WxCardBuilder();
   }
 
   /**
-   * 小程序卡片
+   * 获得菜单消息builder.
+   */
+  public static WxMsgMenuBuilder MSGMENU() {
+    return new WxMsgMenuBuilder();
+  }
+
+  /**
+   * 小程序卡片.
    */
   public static MiniProgramPageBuilder MINIPROGRAMPAGE() {
     return new MiniProgramPageBuilder();
   }
 
   /**
+   * 发送图文消息（点击跳转到图文消息页面）使用通过 “发布” 系列接口得到的 article_id(草稿箱功能上线后不再支持客服接口中带 media_id 的 mpnews 类型的图文消息)
+   */
+  public static MpNewsArticleBuilder MPNEWSARTICLE() {
+    return new MpNewsArticleBuilder();
+  }
+
+  /**
    * <pre>
    * 请使用
-   * {@link WxConsts.KefuMsgType#TEXT}
-   * {@link WxConsts.KefuMsgType#IMAGE}
-   * {@link WxConsts.KefuMsgType#VOICE}
-   * {@link WxConsts.KefuMsgType#MUSIC}
-   * {@link WxConsts.KefuMsgType#VIDEO}
-   * {@link WxConsts.KefuMsgType#NEWS}
-   * {@link WxConsts.KefuMsgType#MPNEWS}
-   * {@link WxConsts.KefuMsgType#WXCARD}
-   * {@link WxConsts.KefuMsgType#MINIPROGRAMPAGE}
-   * {@link WxConsts.KefuMsgType#TASKCARD}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#TEXT}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#IMAGE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#VOICE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#MUSIC}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#VIDEO}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#NEWS}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#MPNEWS}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#WXCARD}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#MINIPROGRAMPAGE}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#TASKCARD}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#MSGMENU}
+   * {@link me.chanjar.weixin.common.api.WxConsts.KefuMsgType#MP_NEWS_ARTICLE}
    * </pre>
-   *
    */
   public void setMsgType(String msgType) {
     this.msgType = msgType;
@@ -122,6 +146,8 @@ public class WxMpKefuMessage implements Serializable {
   }
 
   @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
   public static class WxArticle implements Serializable {
     private static final long serialVersionUID = 5145137235440507379L;
 
@@ -129,5 +155,15 @@ public class WxMpKefuMessage implements Serializable {
     private String description;
     private String url;
     private String picUrl;
+  }
+
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class MsgMenu implements Serializable {
+    private static final long serialVersionUID = 7020769047598378839L;
+
+    private String id;
+    private String content;
   }
 }

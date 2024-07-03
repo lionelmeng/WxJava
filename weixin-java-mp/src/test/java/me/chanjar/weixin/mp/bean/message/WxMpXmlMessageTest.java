@@ -79,9 +79,9 @@ public class WxMpXmlMessageTest {
     assertEquals(wxMessage.getMediaId(), "media_id");
     assertEquals(wxMessage.getFormat(), "Format");
     assertEquals(wxMessage.getThumbMediaId(), "thumb_media_id");
-    assertEquals(wxMessage.getLocationX(), 23.134521d);
-    assertEquals(wxMessage.getLocationY(), 113.358803d);
-    assertEquals(wxMessage.getScale(), 20d);
+    assertEquals(wxMessage.getLocationX().doubleValue(), 23.134521d);
+    assertEquals(wxMessage.getLocationY().doubleValue(), 113.358803d);
+    assertEquals(wxMessage.getScale().doubleValue(), 20d);
     assertEquals(wxMessage.getLabel(), "位置信息");
     assertEquals(wxMessage.getDescription(), "公众平台官网链接");
     assertEquals(wxMessage.getUrl(), "url");
@@ -89,9 +89,9 @@ public class WxMpXmlMessageTest {
     assertEquals(wxMessage.getEvent(), "subscribe");
     assertEquals(wxMessage.getEventKey(), "qrscene_123123");
     assertEquals(wxMessage.getTicket(), "TICKET");
-    assertEquals(wxMessage.getLatitude(), 23.137466);
-    assertEquals(wxMessage.getLongitude(), 113.352425);
-    assertEquals(wxMessage.getPrecision(), 119.385040);
+    assertEquals(wxMessage.getLatitude().doubleValue(), 23.137466);
+    assertEquals(wxMessage.getLongitude().doubleValue(), 113.352425);
+    assertEquals(wxMessage.getPrecision().doubleValue(), 119.385040);
     assertEquals(wxMessage.getScanCodeInfo().getScanType(), "qrcode");
     assertEquals(wxMessage.getScanCodeInfo().getScanResult(), "1");
     assertEquals(wxMessage.getSendPicsInfo().getCount(), new Long(1L));
@@ -170,9 +170,9 @@ public class WxMpXmlMessageTest {
     assertEquals(wxMessage.getMediaId(), "media_id");
     assertEquals(wxMessage.getFormat(), "Format");
     assertEquals(wxMessage.getThumbMediaId(), "thumb_media_id");
-    assertEquals(wxMessage.getLocationX(), 23.134521d);
-    assertEquals(wxMessage.getLocationY(), 113.358803d);
-    assertEquals(wxMessage.getScale(), 20d);
+    assertEquals(wxMessage.getLocationX().doubleValue(), 23.134521d);
+    assertEquals(wxMessage.getLocationY().doubleValue(), 113.358803d);
+    assertEquals(wxMessage.getScale().doubleValue(), 20d);
     assertEquals(wxMessage.getLabel(), "位置信息");
     assertEquals(wxMessage.getDescription(), "公众平台官网链接");
     assertEquals(wxMessage.getUrl(), "url");
@@ -180,9 +180,9 @@ public class WxMpXmlMessageTest {
     assertEquals(wxMessage.getEvent(), "subscribe");
     assertEquals(wxMessage.getEventKey(), "qrscene_123123");
     assertEquals(wxMessage.getTicket(), "TICKET");
-    assertEquals(wxMessage.getLatitude(), 23.137466);
-    assertEquals(wxMessage.getLongitude(), 113.352425);
-    assertEquals(wxMessage.getPrecision(), 119.385040);
+    assertEquals(wxMessage.getLatitude().doubleValue(), 23.137466);
+    assertEquals(wxMessage.getLongitude().doubleValue(), 113.352425);
+    assertEquals(wxMessage.getPrecision().doubleValue(), 119.385040);
     assertEquals(wxMessage.getScanCodeInfo().getScanType(), "qrcode");
     assertEquals(wxMessage.getScanCodeInfo().getScanResult(), "1");
     assertEquals(wxMessage.getSendPicsInfo().getCount(), new Long(1L));
@@ -275,5 +275,86 @@ public class WxMpXmlMessageTest {
     assertThat(resultList.get(1).get("CanReprint")).isEqualTo("1");
     assertThat(resultList.get(1).get("NeedReplaceContent")).isEqualTo("1");
     assertThat(resultList.get(1).get("NeedShowReprintSource")).isEqualTo("1");
+  }
+
+  public void testSubMsgPopupFromXml() {
+
+    String xml = "<xml>"
+      + "<ToUserName><![CDATA[gh_123456789abc]]></ToUserName>"
+      + "<FromUserName><![CDATA[otFpruAK8D-E6EfStSYonYSBZ8_4]]></FromUserName>"
+      + "<CreateTime>1610969440</CreateTime>"
+      + "<MsgType><![CDATA[event]]></MsgType>"
+      + "<Event><![CDATA[subscribe_msg_popup_event]]></Event>"
+      + "<SubscribeMsgPopupEvent>"
+      + "<List>"
+      + "<TemplateId><![CDATA[VRR0UEO9VJOLs0MHlU0OilqX6MVFDwH3_3gz3Oc0NIc]]></TemplateId>"
+      + "<SubscribeStatusString><![CDATA[accept]]></SubscribeStatusString>"
+      + "<PopupScene>2</PopupScene>"
+      + "</List>"
+      + "<List>"
+      + "<TemplateId><![CDATA[9nLIlbOQZC5Y89AZteFEux3WCXRRRG5Wfzkpssu4bLI]]></TemplateId>"
+      + "<SubscribeStatusString><![CDATA[reject]]></SubscribeStatusString>"
+      + "<PopupScene>2</PopupScene>"
+      + "</List>"
+      + "</SubscribeMsgPopupEvent>"
+      + "</xml>";
+
+    WxMpXmlMessage wxMessage = WxMpXmlMessage.fromXml(xml);
+    WxMpSubscribeMsgEvent.PopupEvent popupEvent = wxMessage.getSubscribeMsgPopupEvent().getList().get(0);
+    assertEquals(popupEvent.getTemplateId(), "VRR0UEO9VJOLs0MHlU0OilqX6MVFDwH3_3gz3Oc0NIc");
+    assertEquals(popupEvent.getSubscribeStatusString(), "accept");
+    assertEquals(popupEvent.getPopupScene(), "2");
+    WxMpSubscribeMsgEvent.PopupEvent popupEvent2 = wxMessage.getSubscribeMsgPopupEvent().getList().get(1);
+    assertEquals(popupEvent2.getTemplateId(), "9nLIlbOQZC5Y89AZteFEux3WCXRRRG5Wfzkpssu4bLI");
+    assertEquals(popupEvent2.getSubscribeStatusString(), "reject");
+    assertEquals(popupEvent2.getPopupScene(), "2");
+  }
+
+  public void testSubMsgChangeFromXml() {
+
+    String xml = "<xml>"
+      + "<ToUserName><![CDATA[gh_123456789abc]]></ToUserName>"
+      + "<FromUserName><![CDATA[otFpruAK8D-E6EfStSYonYSBZ8_4]]></FromUserName>"
+      + "<CreateTime>1610969440</CreateTime>"
+      + "<MsgType><![CDATA[event]]></MsgType>"
+      + "<Event><![CDATA[subscribe_msg_change_event]]></Event>"
+      + "<SubscribeMsgChangeEvent>"
+      + "<List>"
+      + "<TemplateId><![CDATA[VRR0UEO9VJOLs0MHlU0OilqX6MVFDwH3_3gz3Oc0NIc]]></TemplateId>"
+      + "<SubscribeStatusString><![CDATA[reject]]></SubscribeStatusString>"
+      + "</List>"
+      + "</SubscribeMsgChangeEvent>"
+      + "</xml>";
+
+    WxMpXmlMessage wxMessage = WxMpXmlMessage.fromXml(xml);
+    WxMpSubscribeMsgEvent.ChangeEvent changeEvent = wxMessage.getSubscribeMsgChangeEvent().getList().get(0);
+    assertEquals(changeEvent.getTemplateId(), "VRR0UEO9VJOLs0MHlU0OilqX6MVFDwH3_3gz3Oc0NIc");
+    assertEquals(changeEvent.getSubscribeStatusString(), "reject");
+  }
+
+  public void testSubMsgSentFromXml() {
+
+    String xml = "<xml>"
+      + "<ToUserName><![CDATA[gh_123456789abc]]></ToUserName>"
+      + "<FromUserName><![CDATA[otFpruAK8D-E6EfStSYonYSBZ8_4]]></FromUserName>"
+      + "<CreateTime>1610969440</CreateTime>"
+      + "<MsgType><![CDATA[event]]></MsgType>"
+      + "<Event><![CDATA[subscribe_msg_sent_event]]></Event>"
+      + "<SubscribeMsgSentEvent>"
+      + "<List>"
+      + "<TemplateId><![CDATA[VRR0UEO9VJOLs0MHlU0OilqX6MVFDwH3_3gz3Oc0NIc]]></TemplateId>"
+      + "<MsgID>1700827132819554304</MsgID>"
+      + "<ErrorCode>0</ErrorCode>"
+      + "<ErrorStatus><![CDATA[success]]></ErrorStatus>"
+      + "</List>"
+      + "</SubscribeMsgSentEvent>"
+      + "</xml>";
+
+    WxMpXmlMessage wxMessage = WxMpXmlMessage.fromXml(xml);
+    WxMpSubscribeMsgEvent.SentEvent sentEvent = wxMessage.getSubscribeMsgSentEvent().getList().get(0);
+    assertEquals(sentEvent.getTemplateId(), "VRR0UEO9VJOLs0MHlU0OilqX6MVFDwH3_3gz3Oc0NIc");
+    assertEquals(sentEvent.getMsgId(), "1700827132819554304");
+    assertEquals(sentEvent.getErrorCode(), "0");
+    assertEquals(sentEvent.getErrorStatus(), "success");
   }
 }
